@@ -9,11 +9,23 @@ Examples:
 User: open brave
 {"action": "open_app", "app": "brave", "workspace": null}
 
-User: go to workspace 3
+User: go to workspace third
 {"action": "switch_workspace", "app": null, "workspace": 3}
+
+User: can you swith to switch_workspace second
+{"action": "switch_workspace", "app": null, "workspace": 2}
 
 User: open terminal
 {"action": "open_app", "app": "kitty", "workspace": null}
+
+User: find brave
+{"action": "find_app", "app": "brave", "workspace": null}
+
+User: can you navigate to Discord
+{"action": "find_app", "app": "discord", "workspace": null}
+
+User: where is Discord
+{"action": "find_app", "app": "discord", "workspace": null}
 
 RULES (never break these):
 - Output ONLY the raw JSON object. Nothing else.

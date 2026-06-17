@@ -1,4 +1,5 @@
 {
     "action": "open_app",
-    "app": "video"
+    "app": "vscode",
+    "workspace": 2
 }
