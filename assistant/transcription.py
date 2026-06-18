@@ -64,6 +64,14 @@ def clean_whisper_output(raw: str) -> str:
 
 
 def start_recording() -> None:
+    """Start recording audio to a temp file."""
+
+    # clean previous error log
+    log_file = os.path.expanduser("~/.config/hypr/assistant/error.log")
+    if os.path.exists(log_file):
+        with open(log_file, "w") as f:
+            f.write("")  # clear the log file
+
     if os.path.exists(PID_FILE):
         notify(
             "Voice Note",

@@ -13,6 +13,14 @@ def run(*args) -> str:
     return result.stdout.strip()
 
 
+def save_error_log(message: str):
+    """Save an error message to a log file."""
+    log_file = os.path.expanduser("~/.config/hypr/assistant/error.log")
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+    with open(log_file, "a") as f:
+        f.write(f"{message}\n")
+
+
 def dispatch(lua_expr: str) -> bool:
     """Run hyprctl dispatch with a Lua dispatcher expression."""
     cmd = ["hyprctl", "dispatch", lua_expr]
@@ -25,6 +33,7 @@ def dispatch(lua_expr: str) -> bool:
     if stdout:
         print(f"  stdout: {stdout}")
     if stderr:
+        save_error_log(f"stderr: {stderr}")
         print(f"  stderr: {stderr}", file=sys.stderr)
 
     success = result.returncode == 0 and "ok" in stdout.lower()
@@ -68,6 +77,7 @@ def get_proper_app_name(app: str) -> str:
         with open(apps_file) as f:
             apps_mapping = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
+        save_error_log(f"Could not load apps mapping from {apps_file}")
         print(f"Warning: Could not load apps mapping from {apps_file}", file=sys.stderr)
         return app
 
@@ -84,7 +94,14 @@ def handle(data: dict):
 
     if action == "open_app":
         if not app:
+            save_error_log("Error: 'app' field is required for open_app")
             print("Error: 'app' field is required", file=sys.stderr)
+            subprocess.run(
+                [
+                    "python3",
+                    os.path.expanduser("~/.config/hypr/assistant/speak.py"),
+                ]
+            )
             sys.exit(1)
         if workspace is None:
             workspace = get_free_workspace()
@@ -95,20 +112,46 @@ def handle(data: dict):
         app = get_proper_app_name(app)
         print(f"Launching '{app}'...")
         dispatch(f'hl.dsp.exec_cmd("{app}")')
+        subprocess.run(
+            [
+                "python3",
+                os.path.expanduser("~/.config/hypr/assistant/speak.py"),
+            ]
+        )
 
     elif action == "switch_workspace":
         if workspace is None:
+            save_error_log("Error: 'workspace' field is required for switch_workspace")
             print(
                 "Error: 'workspace' field is required for switch_workspace",
                 file=sys.stderr,
             )
+            subprocess.run(
+                [
+                    "python3",
+                    os.path.expanduser("~/.config/hypr/assistant/speak.py"),
+                ]
+            )
             sys.exit(1)
         print(f"Switching to workspace {workspace}...")
         dispatch(f'hl.dsp.focus({{ workspace = "{workspace}" }})')
+        subprocess.run(
+            [
+                "python3",
+                os.path.expanduser("~/.config/hypr/assistant/speak.py"),
+            ]
+        )
 
     elif action == "find_app":
         if not app:
+            save_error_log("Error: 'app' field is required for find_app")
             print("Error: 'app' field is required for find_app", file=sys.stderr)
+            subprocess.run(
+                [
+                    "python3",
+                    os.path.expanduser("~/.config/hypr/assistant/speak.py"),
+                ]
+            )
             sys.exit(1)
         app = get_proper_app_name(app)
         print(f"Searching for '{app}'...")
@@ -117,15 +160,41 @@ def handle(data: dict):
             # fallback: try the raw name from JSON in case proper name didn't match
             raw_app = data.get("app", "")
             ws_id = get_app_workspace(raw_app)
+            subprocess.run(
+                [
+                    "python3",
+                    os.path.expanduser("~/.config/hypr/assistant/speak.py"),
+                ]
+            )
         if ws_id is None:
             print(f"'{app}' is not currently open.", file=sys.stderr)
+            save_error_log(f"App '{app}' not found")
             notify(f"App '{app}' not found")
+            subprocess.run(
+                [
+                    "python3",
+                    os.path.expanduser("~/.config/hypr/assistant/speak.py"),
+                ]
+            )
             sys.exit(1)
         print(f"Found '{app}' on workspace {ws_id}, switching...")
         dispatch(f'hl.dsp.focus({{ workspace = "{ws_id}" }})')
+        subprocess.run(
+            [
+                "python3",
+                os.path.expanduser("~/.config/hypr/assistant/speak.py"),
+            ]
+        )
 
     else:
+        save_error_log(f"Unknown action: {action!r}")
         print(f"Unknown action: {action!r}", file=sys.stderr)
+        subprocess.run(
+            [
+                "python3",
+                os.path.expanduser("~/.config/hypr/assistant/speak.py"),
+            ]
+        )
         sys.exit(1)
 
 
@@ -143,8 +212,9 @@ if __name__ == "__main__":
     try:
         payload = json.loads(raw)
     except json.JSONDecodeError as e:
+        save_error_log(f"Invalid JSON: {e}")
         print(f"Invalid JSON: {e}", file=sys.stderr)
         notify(f"Invalid JSON: {e}")
         sys.exit(1)
 
-    handle(payload)
+    handle(payload) 
