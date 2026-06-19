@@ -6,21 +6,20 @@ task = Path("~/.config/hypr/assistant/task.txt").expanduser().read_text()
 
 error_logs = Path("~/.config/hypr/assistant/error.log").expanduser().read_text()
 
-error_section = f"ERROR:\n{error_logs}" if error_logs.strip() else "STATUS: success"
-
 system_prompt = f"""You are Nova, a casual Linux assistant. Be concise — max two sentences.
 
-{error_section}
+if you see an ERROR in here, the task has failed. Briefly explain why from the error logs.
+{error_logs}
+
+if there is no ERROR, the task has succeeded. Confirm the task is done, sound happy and confident.
 
 TASK: {task}
 
-If ERROR is shown above: tell the user the task failed and briefly explain why from the error.
-If STATUS is success: confirm the task is done, sound happy and confident.
-Do not mention JSON. Do not repeat yourself."""
+Do not mention JSON. Do not repeat yourself. Do not use emojis."""
 
 #print(error_logs)
 
-response = ollama.generate(model="gemma3:1b", prompt=system_prompt)
+response = ollama.generate(model="gemma3:4b", prompt=system_prompt)
 
 #print(response["response"])
 

@@ -13,7 +13,7 @@ User command:
 {user_prompt}
 """
 response = ollama.generate(
-    model="gemma3:1b",
+    model="gemma3:4b",
     prompt=prompt
 )
 
@@ -23,3 +23,5 @@ action = json.loads(json_str)
 
 with open(Path("~/.config/hypr/assistant/action.json").expanduser(), "w") as f:
     json.dump(action, f, indent=4)
+print(response.response)
+print(user_prompt)
