@@ -1,13 +1,4 @@
 #!/usr/bin/env python3
-"""
-voice_note.py — Press-and-hold voice recorder for Hyprland + whisper.cpp
-─────────────────────────────────────────────────────────────────────────
-
-
-Dependencies (Arch):
-  sudo pacman -S alsa-utils libnotify
-  (PipeWire users: pipewire-alsa is enough for arecord to work)
-"""
 
 import os
 import re
@@ -38,6 +29,27 @@ def notify(title: str, body: str = "", urgency: str = "normal") -> None:
     if body:
         cmd.append(body)
     subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def speak_info(into: str) -> None:
+    piper = subprocess.Popen(
+        [
+            "piper-tts",
+            "--model",
+            str(Path("~/piper-models/en_US-amy-medium.onnx").expanduser()),
+            "--output_file",
+            "-",
+        ],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+    )
+
+
+    aplay = subprocess.Popen(["aplay"], stdin=piper.stdout)
+    piper.stdin.write(into.encode())
+    piper.stdin.close()
+    piper.wait()
+    aplay.wait()
 
 
 def die(msg: str) -> None:
@@ -78,6 +90,7 @@ def start_recording() -> None:
             "Already recording — release Super+A first",
             urgency="critical",
         )
+        speak_info("Already recording — release Super+A first")
         return
 
     # Remove stale audio file
@@ -103,12 +116,13 @@ def start_recording() -> None:
 
     Path(PID_FILE).write_text(str(proc.pid))
     notify("Voice Note ", "Recording… release Super+A to stop")
+    speak_info("I'm listening…")
 
 
-def stop_recording() -> None:
+def stop_recording() -> bool:
     if not os.path.exists(PID_FILE):
         # Key released without a matching start — silently ignore
-        return
+        return False
 
     # ── 1. Stop arecord ───────────────────────────────────────────────────────
     pid = int(Path(PID_FILE).read_text().strip())
@@ -128,7 +142,8 @@ def stop_recording() -> None:
         die("Audio file not found — recording may have failed")
 
     # ── 2. Run whisper-cli ────────────────────────────────────────────────────
-    notify("Voice Note ", "Transcribing…")
+    notify("Voice Note", "Transcribing…")
+    speak_info("Transcribing…")
 
     if not Path(WHISPER_CLI).exists():
         die(f"whisper-cli not found at:\n{WHISPER_CLI}")
@@ -155,7 +170,8 @@ def stop_recording() -> None:
 
     if not text:
         notify("Voice Note", "Nothing detected — try again", urgency="critical")
-        return
+        speak_info("Nothing detected — try again")
+        return False # return false so if there is no text, the action is not taken
 
     # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     entry = f"{text}\n"
@@ -169,6 +185,7 @@ def stop_recording() -> None:
 
     # Clean up temp audio
     Path(AUDIO_FILE).unlink(missing_ok=True)
+    return True  # return true so if there is text, the action is taken
 
 
 # ── Entrypoint ────────────────────────────────────────────────────────────────
@@ -184,7 +201,9 @@ if __name__ == "__main__":
         case "start":
             start_recording()
         case "stop":
-            stop_recording()
+            is_success = stop_recording()
+            if not is_success:
+                sys.exit(1)
             subprocess.run(
                 [
                     "python3",
@@ -201,4 +220,3 @@ if __name__ == "__main__":
         case _:
             print(USAGE)
             sys.exit(1)
-

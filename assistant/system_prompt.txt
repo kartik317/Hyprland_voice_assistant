@@ -31,7 +31,7 @@ User: can you move windows from workspace first to third
 {"action": "move_window", "from": 1, "to": 3}
 
 User: Hey can you please things from workspace fourth to first
- {"action": "move_window", "from": 4, "to": 1}
+{"action": "move_window", "from": 4, "to": 1}
 
 
 RULES (never break these):

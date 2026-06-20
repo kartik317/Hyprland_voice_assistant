@@ -1,5 +1,5 @@
 {
-    "action": "move_window",
-    "from": 5,
-    "to": 1
+    "action": "find_app",
+    "app": null,
+    "workspace": null
 }

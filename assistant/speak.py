@@ -15,6 +15,8 @@ if there is no ERROR, the task has succeeded. Confirm the task is done, sound ha
 
 TASK: {task}
 
+if there is no task, say "No task provided".
+
 Do not mention JSON. Do not repeat yourself. Do not use emojis."""
 
 #print(error_logs)
