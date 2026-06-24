@@ -192,6 +192,8 @@ def _handle(data: dict):
         print(f"Moving {len(addresses)} window(s) from workspace {from_ws} to {to_ws}...")
         for addr in addresses:
             dispatch(f'hl.dsp.window.move({{ workspace = "{to_ws}", window = "address:{addr}" }})')
+    elif action == "talk":
+        return  # No action needed; speak() will handle the talking
 
     else:
         save_error_log(f"Unknown action: {action!r}")
@@ -219,3 +221,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     handle(payload)
+    subprocess.run(["qs", "ipc", "call", "nova", "setSpeaking", "false"])

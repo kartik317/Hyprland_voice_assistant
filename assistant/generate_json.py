@@ -4,7 +4,7 @@ import json
 import re
 
 system_prompt = (
-    Path("~/.config/hypr/assistant/system_prompt.txt").expanduser().read_text()
+    Path("~/.config/hypr/assistant/prompts/system_prompt.txt").expanduser().read_text()
 )
 user_prompt = Path("~/.config/hypr/assistant/task.txt").expanduser().read_text()
 prompt = f"""
@@ -13,15 +13,23 @@ User command:
 {user_prompt}
 """
 response = ollama.generate(
-    model="gemma3:4b",
-    prompt=prompt
+    model="gemma3:1b",
+    prompt=prompt,
+    format={
+        "type": "object",
+        "properties": {
+            "action": {"type": "string"},
+            "app": {"type": ["string", "null"]},
+            "workspace": {"type": ["integer", "null"]},
+            "from": {"type": ["integer", "null"]},
+            "to": {"type": ["integer", "null"]}
+        }
+    }
 )
 
-raw = response.response
-json_str = re.search(r'\{.*\}', raw, re.DOTALL).group()
-action = json.loads(json_str)
+action = json.loads(response.response)
 
 with open(Path("~/.config/hypr/assistant/action.json").expanduser(), "w") as f:
     json.dump(action, f, indent=4)
-print(response.response)
-print(user_prompt)
+#print(response.response)
+#print(user_prompt)

@@ -1,5 +1,4 @@
 {
-    "action": "find_app",
-    "app": null,
-    "workspace": null
+    "action": "talk",
+    "app": "arch"
 }

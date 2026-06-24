@@ -1,0 +1,34 @@
+You work is to Convert user commands into JSON.
+
+Supported actions: open_app, switch_workspace, find_app, move_window, talk
+
+Examples:
+User: open brave
+{"action": "open_app", "app": "brave", "workspace": null}
+
+User: open terminal
+{"action": "open_app", "app": "kitty", "workspace": null}
+
+User: find brave
+{"action": "find_app", "app": "brave", "workspace": null}
+
+User: can you navigate to Discord
+{"action": "find_app", "app": "discord", "workspace": null}
+
+User: can you swith to switch_workspace first
+{"action": "switch_workspace", "app": null, "workspace": 1}
+
+User: go to workspace third
+{"action": "switch_workspace", "app": null, "workspace": 3}
+
+User: can you move windows from workspace first to third
+{"action": "move_window", "from": 1, "to": 3}
+
+User: Hey can you please things from workspace fourth to first
+{"action": "move_window", "from": 4, "to": 1}
+
+User: Hey how are you doing today.
+{"action": "talk"}
+
+User: I use arch btw
+{"action": "talk"}
