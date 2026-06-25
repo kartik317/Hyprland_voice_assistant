@@ -24,6 +24,11 @@ response = ollama.generate(
             "from": {"type": ["integer", "null"]},
             "to": {"type": ["integer", "null"]}
         }
+    },
+    options={
+        "num_predict": 64,   # your JSON object is tiny, cap generation
+        "num_ctx": 512,      # your prompt+examples are well under this; smaller ctx = faster prefill/less KV-cache alloc
+        "temperature": 0,    # deterministic, marginally faster sampling
     }
 )
 

@@ -4,7 +4,6 @@ import os
 import subprocess
 import sys
 import time
-from transcription import notify
 from difflib import get_close_matches
 
 DISPATCH_TIMEOUT = 5  # seconds — prevents silent infinite hangs
@@ -156,6 +155,7 @@ def _handle(data: dict):
         dispatch(f'hl.dsp.focus({{ workspace = "{workspace}" }})')
 
     elif action == "find_app":
+        from transcription import notify 
         if not app:
             save_error_log("Error: 'app' field is required for find_app")
             print("Error: 'app' field is required for find_app", file=sys.stderr)
@@ -215,6 +215,7 @@ if __name__ == "__main__":
     try:
         payload = json.loads(raw)
     except json.JSONDecodeError as e:
+        from transcription import notify 
         save_error_log(f"Invalid JSON: {e}")
         print(f"Invalid JSON: {e}", file=sys.stderr)
         notify(f"Invalid JSON: {e}")

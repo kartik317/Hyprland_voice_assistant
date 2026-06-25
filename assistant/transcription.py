@@ -5,8 +5,8 @@ import re
 import sys
 import signal
 import subprocess
-from datetime import datetime
 from pathlib import Path
+import json
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -43,7 +43,6 @@ def speak_info(info: str) -> None:
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
     )
-
 
     aplay = subprocess.Popen(["aplay"], stdin=piper.stdout)
     piper.stdin.write(info.encode())
@@ -115,7 +114,7 @@ def start_recording() -> None:
     )
 
     Path(PID_FILE).write_text(str(proc.pid))
-    #notify("Voice Note ", "Recording… release Super+A to stop")
+    # notify("Voice Note ", "Recording… release Super+A to stop")
     speak_info("I'm listening…")
 
 
@@ -142,7 +141,7 @@ def stop_recording() -> bool:
         die("Audio file not found — recording may have failed")
 
     # ── 2. Run whisper-cli ────────────────────────────────────────────────────
-    #notify("Voice Note", "Transcribing…")
+    # notify("Voice Note", "Transcribing…")
     speak_info("Transcribing…")
 
     if not Path(WHISPER_CLI).exists():
@@ -169,9 +168,11 @@ def stop_recording() -> bool:
     text = clean_whisper_output(raw)
 
     if not text:
-        #notify("Voice Note", "Nothing detected — try again", urgency="critical")
-        speak_info("Nothing detected — I'm sorry, I didn't catch that. Please try again.")
-        return False # return false so if there is no text, the action is not taken
+        # notify("Voice Note", "Nothing detected — try again", urgency="critical")
+        speak_info(
+            "Nothing detected — I'm sorry, I didn't catch that. Please try again."
+        )
+        return False  # return false so if there is no text, the action is not taken
 
     # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     entry = f"{text}\n"
@@ -181,7 +182,7 @@ def stop_recording() -> bool:
 
     # Show the first ~70 chars in the notification
     preview = text if len(text) <= 70 else text[:67] + "…"
-    #notify("Voice Note ✓", f'"{preview}"\n→ saved to task.txt')
+    # notify("Voice Note ✓", f'"{preview}"\n→ saved to task.txt')
 
     # Clean up temp audio
     Path(AUDIO_FILE).unlink(missing_ok=True)
@@ -211,6 +212,7 @@ if __name__ == "__main__":
                     os.path.expanduser("~/.config/hypr/assistant/generate_json.py"),
                 ]
             )
+
             subprocess.run(
                 [
                     "python3",
