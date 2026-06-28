@@ -6,13 +6,21 @@ import sys
 import time
 from difflib import get_close_matches
 
+from transcription import notify
+
 DISPATCH_TIMEOUT = 5  # seconds — prevents silent infinite hangs
+SPEAK_TIMEOUT = 15  # seconds — prevents a stuck speak.py from hanging the dispatcher
 
 
 def speak():
-    subprocess.run(
-        ["python3", os.path.expanduser("~/.config/hypr/assistant/speak.py")]
-    )
+    try:
+        subprocess.run(
+            ["python3", os.path.expanduser("~/.config/hypr/assistant/speak.py")],
+            timeout=SPEAK_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        save_error_log("speak.py timed out")
+        print("  ✗ speak.py timed out", file=sys.stderr)
 
 
 def run(*args, timeout=DISPATCH_TIMEOUT) -> str:
@@ -155,7 +163,6 @@ def _handle(data: dict):
         dispatch(f'hl.dsp.focus({{ workspace = "{workspace}" }})')
 
     elif action == "find_app":
-        from transcription import notify 
         if not app:
             save_error_log("Error: 'app' field is required for find_app")
             print("Error: 'app' field is required for find_app", file=sys.stderr)
@@ -215,7 +222,6 @@ if __name__ == "__main__":
     try:
         payload = json.loads(raw)
     except json.JSONDecodeError as e:
-        from transcription import notify 
         save_error_log(f"Invalid JSON: {e}")
         print(f"Invalid JSON: {e}", file=sys.stderr)
         notify(f"Invalid JSON: {e}")

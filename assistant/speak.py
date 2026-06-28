@@ -27,7 +27,7 @@ def get_system_prompt():
 if you see an ERROR in here, the task has failed. Briefly explain why from the error logs max two sentences.
 {error_logs}
 if there is no ERROR, the task has succeeded. Confirm the task is done, sound happy and confident.
-Here is the task: {task}
+Here is the task: '{task}'
 if there is no task, say "No task provided".
 Do not mention JSON. Do not repeat yourself"""
 

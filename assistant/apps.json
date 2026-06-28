@@ -28,6 +28,7 @@
     "file manager": "thunar",
     "thunar": "thunar",
     "files": "thunar",
+    "filemanager": "thunar",
     "telegram": "org.telegram.desktop",
     "kitty terminal": "kitty",
     "neovim": "kitty -e nvim",
