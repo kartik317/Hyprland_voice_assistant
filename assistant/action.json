@@ -1,4 +1,3 @@
 {
-    "action": "open_app",
-    "app": "filemanager"
+    "action": "talk"
 }
